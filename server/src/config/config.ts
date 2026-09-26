@@ -4,6 +4,7 @@ import type { Config } from './config.types.js';
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(DEFAULT_PORT),
+  MONGODB_URI: z.string({ error: 'is required' }).nonempty('must not be empty'),
 });
 
 /**
@@ -22,5 +23,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     );
   }
 
-  return { port: result.data.PORT };
+  return {
+    port: result.data.PORT,
+    mongodbUri: result.data.MONGODB_URI,
+  };
 }
