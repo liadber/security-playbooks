@@ -16,3 +16,8 @@ export const ARGON2_MAX_PARAMS = {
 };
 /** Argon2 requires at least 8 KiB of memory per lane. */
 export const ARGON2_MIN_MEMORY_PER_LANE = 8;
+
+export const TOKEN_ALGORITHM = 'HS256';
+/** Single source of truth for both the JWT expiry and the auth cookie's max-age. */
+export const TOKEN_LIFETIME_SECONDS = 60 * 60;
+export const AUTH_COOKIE_NAME = 'token';
