@@ -1,3 +1,5 @@
+export const PASSWORD_MIN_LENGTH = 8;
+
 export const ARGON2_ALGORITHM = 'argon2id';
 /** OWASP recommendation for Argon2id: 19 MiB, 2 passes, 1 lane. */
 export const ARGON2_PARAMS = { memory: 19 * 1024, passes: 2, parallelism: 1 };

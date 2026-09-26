@@ -24,6 +24,6 @@ try {
   process.exit(1);
 }
 
-createApp().listen(config.port, () => {
+createApp(config).listen(config.port, () => {
   console.log(`Server listening on http://localhost:${config.port}`);
 });
