@@ -116,6 +116,17 @@ try { Invoke-RestMethod -Method Post -Uri "$base/auth/register" -ContentType "ap
 catch { $_.ErrorDetails.Message }
 ```
 
+## Tests
+
+```sh
+cd server
+npm test
+```
+
+Unit tests (config, password hashing, tokens, validation schemas) need nothing else. Integration tests send real HTTP requests to the app with `supertest` against an in-memory MongoDB started by `mongodb-memory-server`, so Docker does not need to be running. The first run downloads a MongoDB binary (a few hundred MB; about 600 MB on Windows) into `~/.cache/mongodb-binaries`, so it takes a few minutes; later runs take seconds.
+
+`npm run test:watch` re-runs the tests on every save. Test files sit next to the code they test (`*.test.ts`) and are excluded from the build output.
+
 ## Project structure (`server/src`)
 
 ```
