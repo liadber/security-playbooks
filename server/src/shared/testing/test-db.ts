@@ -13,6 +13,8 @@ export function useTestDatabase(): void {
     const uri = new URL(inject('mongoUri'));
     uri.pathname = `/test-${randomUUID()}`;
     await connectToDatabase(uri.href);
+    // Unique indexes are built in the background; wait so a duplicate cannot slip in first.
+    await Promise.all(Object.values(mongoose.models).map((model) => model.init()));
   });
 
   afterEach(async () => {
