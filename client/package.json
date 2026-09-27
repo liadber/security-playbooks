@@ -9,8 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "prettier --write --config .prettierrc . ../shared",
+    "format:check": "prettier --check --config .prettierrc . ../shared",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
 import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 
@@ -15,6 +16,11 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    resolve: {
+      // Mirrors the @shared/* path in tsconfig; the folder holds type-only files, so the
+      // alias only matters for tooling that resolves imports before TypeScript erases them.
+      alias: { '@shared': fileURLToPath(new URL('../shared', import.meta.url)) },
+    },
     server: {
       // Forwards /api/* to the API server with the prefix removed, so the browser only
       // talks to one origin and the auth cookie is first-party.
