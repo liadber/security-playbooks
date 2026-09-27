@@ -37,7 +37,6 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'jsdom',
       setupFiles: ['src/shared/testing/setup.ts'],
-      passWithNoTests: true,
       // Mocks are reset between tests, so one test cannot affect another.
       mockReset: true,
     },
