@@ -96,6 +96,43 @@ describe('useFormAction', () => {
     expect(screen.getByLabelText('Password')).toHaveValue('');
   });
 
+  it('keeps every checked value of a multi-value field after a failed submit', async () => {
+    const submit = vi.fn<FormSubmit>().mockRejectedValue(new ApiError(400, 'Validation failed'));
+    function ChecklistForm() {
+      const { state, formAction } = useFormAction(submit, { keepMultiValues: ['letters'] });
+      const kept = state.values.letters;
+      const checked = Array.isArray(kept) ? kept : [];
+      return (
+        <form action={formAction}>
+          {state.error && <p>{state.error}</p>}
+          {['A', 'B', 'C'].map((letter) => (
+            <label key={letter}>
+              {letter}
+              <input
+                type="checkbox"
+                name="letters"
+                value={letter}
+                defaultChecked={checked.includes(letter)}
+              />
+            </label>
+          ))}
+          <button type="submit">Send</button>
+        </form>
+      );
+    }
+    render(<ChecklistForm />);
+    const user = userEvent.setup();
+
+    await user.click(screen.getByLabelText('A'));
+    await user.click(screen.getByLabelText('C'));
+    await user.click(screen.getByRole('button', { name: 'Send' }));
+
+    expect(await screen.findByText('Validation failed')).toBeInTheDocument();
+    expect(screen.getByLabelText('A')).toBeChecked();
+    expect(screen.getByLabelText('B')).not.toBeChecked();
+    expect(screen.getByLabelText('C')).toBeChecked();
+  });
+
   it('disables the submit button while the submission is pending', async () => {
     const submit = vi.fn<FormSubmit>().mockReturnValue(new Promise(() => {}));
     render(<TestForm submit={submit} />);
