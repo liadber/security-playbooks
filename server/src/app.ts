@@ -5,6 +5,7 @@ import { createAuthRouter } from './modules/auth/auth.routes.js';
 import { createTokenService } from './modules/auth/token.service.js';
 import { healthRouter } from './modules/health/health.routes.js';
 import { createPlaybooksRouter } from './modules/playbooks/playbooks.routes.js';
+import { createSimulationRouter } from './modules/simulation/simulation.routes.js';
 import { errorHandler } from './shared/middleware/error-handler.middleware.js';
 import { notFoundHandler } from './shared/middleware/not-found.middleware.js';
 
@@ -21,6 +22,7 @@ export function createApp(config: Config) {
   app.use('/health', healthRouter);
   app.use('/auth', createAuthRouter(config, tokens));
   app.use('/playbooks', createPlaybooksRouter(tokens));
+  app.use('/simulateTrigger', createSimulationRouter(tokens));
 
   // Order matters: the 404 handler catches anything the routes above did not,
   // and the error handler must be last so every error reaches it.
