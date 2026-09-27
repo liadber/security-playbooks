@@ -1,10 +1,13 @@
-import { PageLayout } from './shared/components/PageLayout';
-import { APP_NAME } from './shared/constants/app.constants';
+import { BrowserRouter } from 'react-router';
+import { AppRoutes } from './app/AppRoutes';
+import { AuthProvider } from './features/auth/AuthProvider';
 
 export function App() {
   return (
-    <PageLayout title={APP_NAME}>
-      <h1>Welcome</h1>
-    </PageLayout>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
