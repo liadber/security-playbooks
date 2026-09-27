@@ -1,5 +1,5 @@
 import { HttpStatus } from '../../shared/constants/http-status.constants.js';
-import { MONGO_DUPLICATE_KEY_CODE } from '../../shared/db/db.constants.js';
+import { isDuplicateKeyError } from '../../shared/db/duplicate-key.js';
 import { HttpError } from '../../shared/errors/http-error.js';
 import { User } from '../users/user.model.js';
 import type { AuthService, TokenService } from './auth.types.js';
@@ -14,7 +14,7 @@ export function createAuthService(tokens: TokenService): AuthService {
         const user = await User.create({ email, passwordHash });
         return { id: user.id, email: user.email };
       } catch (err) {
-        if ((err as { code?: number }).code === MONGO_DUPLICATE_KEY_CODE) {
+        if (isDuplicateKeyError(err)) {
           throw new HttpError(HttpStatus.CONFLICT, 'Email is already registered');
         }
         throw err;
