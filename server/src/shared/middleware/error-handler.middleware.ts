@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler } from 'express';
+import { SHARED_ERRORS } from '../constants/errors.constants.js';
 import { HttpStatus } from '../constants/http-status.constants.js';
 import { HttpError } from '../errors/http-error.js';
 
@@ -10,5 +11,5 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   }
 
   console.error('Unhandled error:', err);
-  res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
+  res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: SHARED_ERRORS.INTERNAL });
 };

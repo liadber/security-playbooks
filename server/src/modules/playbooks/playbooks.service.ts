@@ -14,6 +14,7 @@ import {
   ACTION_CODES,
   ACTION_LABELS,
   NAME_COLLATION,
+  PLAYBOOK_ERRORS,
   PLAYBOOK_NAME_MAX_LENGTH,
   TRIGGER_CODES,
   TRIGGER_LABELS,
@@ -98,12 +99,12 @@ function ownedBy(userId: string, id: string): { _id: string; userId: string } {
 }
 
 function notFound(): HttpError {
-  return new HttpError(HttpStatus.NOT_FOUND, 'Playbook not found');
+  return new HttpError(HttpStatus.NOT_FOUND, PLAYBOOK_ERRORS.NOT_FOUND);
 }
 
 function nameConflictOr(err: unknown): unknown {
   return isDuplicateKeyError(err)
-    ? new HttpError(HttpStatus.CONFLICT, 'A playbook with this name already exists')
+    ? new HttpError(HttpStatus.CONFLICT, PLAYBOOK_ERRORS.NAME_TAKEN)
     : err;
 }
 

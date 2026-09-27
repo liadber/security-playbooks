@@ -23,3 +23,11 @@ export const TOKEN_ALGORITHM = 'HS256';
 /** Single source of truth for both the JWT expiry and the auth cookie's max-age. */
 export const TOKEN_LIFETIME_SECONDS = 60 * 60;
 export const AUTH_COOKIE_NAME = 'token';
+
+/** Messages of the errors this module answers with; the client shows them as they are. */
+export const AUTH_ERRORS = {
+  INVALID_TOKEN: 'Missing or invalid token',
+  EMAIL_TAKEN: 'Email is already registered',
+  INVALID_CREDENTIALS: 'Invalid email or password',
+  USER_GONE: 'User no longer exists',
+} as const;
