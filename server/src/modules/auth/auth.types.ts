@@ -1,10 +1,9 @@
+import type { Credentials } from '@shared/types/auth.js';
+import type { PublicUser } from '@shared/types/user.js';
 import type { Request } from 'express';
-import type { z } from 'zod';
-import type { PublicUser } from '../users/user.types.js';
-import type { loginSchema, registerSchema } from './auth.schemas.js';
 
-export type RegisterInput = z.infer<typeof registerSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
+export type RegisterInput = Credentials;
+export type LoginInput = Credentials;
 
 /** The token is for the auth cookie; it is never sent in the response body. */
 export interface LoginResult {

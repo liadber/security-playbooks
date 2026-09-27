@@ -14,8 +14,8 @@
     "start": "node --env-file=.env dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "prettier --write --config .prettierrc . ../shared",
+    "format:check": "prettier --check --config .prettierrc . ../shared",
     "test": "vitest run",
     "test:watch": "vitest"
   },

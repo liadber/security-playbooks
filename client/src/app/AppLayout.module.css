@@ -1,0 +1,15 @@
+.navLink {
+  color: var(--color-muted);
+  text-decoration: none;
+  padding: var(--space-1) 0;
+  border-bottom: var(--underline-width) solid transparent;
+}
+
+.navLink:hover {
+  color: var(--color-text);
+}
+
+.active {
+  color: var(--color-text);
+  border-bottom-color: var(--color-primary);
+}
