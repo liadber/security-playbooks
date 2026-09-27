@@ -28,8 +28,10 @@ function parseParam(value: string | undefined, max: number): number | null {
   return Number.isInteger(parsed) && parsed > 0 && parsed <= max ? parsed : null;
 }
 
-// Null for anything missing, malformed, out of range or that argon2 itself would reject,
-// so argon2 is never called with bad input.
+/**
+ * Null for anything missing, malformed, out of range or that argon2 itself would reject,
+ * so argon2 is never called with bad input.
+ */
 function parseParams(memory?: string, passes?: string, parallelism?: string): Argon2Params | null {
   const parsedMemory = parseParam(memory, ARGON2_MAX_PARAMS.memory);
   const parsedPasses = parseParam(passes, ARGON2_MAX_PARAMS.passes);

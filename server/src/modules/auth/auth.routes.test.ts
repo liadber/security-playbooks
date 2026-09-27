@@ -15,8 +15,10 @@ const credentials = { email: 'alice@example.com', password: 'correct-horse' };
 const register = () => request(app).post('/auth/register').send(credentials);
 const login = (body = credentials) => request(app).post('/auth/login').send(body);
 
-// The Set-Cookie header for the auth cookie, e.g.
-// "token=<jwt>; Max-Age=3600; Path=/; Expires=...; HttpOnly; SameSite=Strict".
+/**
+ * The Set-Cookie header for the auth cookie, e.g.
+ * "token=<jwt>; Max-Age=3600; Path=/; Expires=...; HttpOnly; SameSite=Strict".
+ */
 function authCookie(res: Response): string {
   const cookie = (res.get('Set-Cookie') ?? []).find((c) => c.startsWith(`${AUTH_COOKIE_NAME}=`));
   expect(cookie).toBeDefined();
@@ -25,7 +27,7 @@ function authCookie(res: Response): string {
 
 const cookieValue = (cookie: string) => cookie.split(';')[0].slice(AUTH_COOKIE_NAME.length + 1);
 
-// A logged-in agent: supertest agents keep cookies between requests like a browser.
+/** A logged-in agent: supertest agents keep cookies between requests like a browser. */
 async function loggedInAgent() {
   const agent = request.agent(app);
   const registered = await agent.post('/auth/register').send(credentials);
