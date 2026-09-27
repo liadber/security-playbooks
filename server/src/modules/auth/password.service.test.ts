@@ -32,7 +32,7 @@ describe('password service', () => {
 });
 
 describe('verifyPassword with tampered hash parameters', () => {
-  // Replaces the memory, passes and parallelism fields of a real stored hash.
+  /** Replaces the memory, passes and parallelism fields of a real stored hash. */
   async function storedWithParams(memory: string, passes: string, parallelism: string) {
     const parts = (await hashPassword('correct-horse')).split(HASH_SEPARATOR);
     return [parts[0], memory, passes, parallelism, parts[4], parts[5]].join(HASH_SEPARATOR);

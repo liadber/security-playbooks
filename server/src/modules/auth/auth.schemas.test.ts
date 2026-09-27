@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loginSchema, registerSchema } from './auth.schemas.js';
 
-// Maps zod issues to { field: message } the same way the validation middleware does.
+/** Maps zod issues to { field: message } the same way the validation middleware does. */
 function fieldErrors(result: { success: boolean; error?: { issues: unknown[] } }) {
   if (result.success || !result.error) return {};
   const issues = result.error.issues as { path: PropertyKey[]; message: string }[];

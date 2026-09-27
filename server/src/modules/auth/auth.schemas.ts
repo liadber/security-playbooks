@@ -2,7 +2,7 @@ import type { Credentials } from '@shared/types/auth.js';
 import { z } from 'zod';
 import { PASSWORD_MIN_LENGTH } from './auth.constants.js';
 
-// The only place an email is normalized: trimmed and lowercased before the format check.
+/** The only place an email is normalized: trimmed and lowercased before the format check. */
 const email = z
   .string({ error: 'Email is required' })
   .trim()
