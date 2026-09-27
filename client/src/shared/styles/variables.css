@@ -37,6 +37,10 @@
 
   --opacity-disabled: 0.6;
 
-  --content-width: 48rem;
+  --content-width: 72rem;
   --form-width: 24rem;
+
+  /* Where SidebarLayout places its parts, whatever their order in the JSX. */
+  --sidebar-order: 1;
+  --main-order: 2;
 }

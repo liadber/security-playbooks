@@ -1,0 +1,39 @@
+/* The layout takes the height its page leaves it; min-height: 0 lets the parts shrink below
+   their content so that they, not the page, scroll. */
+.layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: var(--space-4);
+}
+
+/* The parts are placed by order, so a page may write them in any order. The padding on the
+   scrolling parts leaves room for focus rings and card outlines at the edges, which a scroll
+   area would otherwise clip. */
+.sidebar {
+  order: var(--sidebar-order);
+  flex: 0 0 var(--form-width);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-1);
+}
+
+.main {
+  order: var(--main-order);
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  margin: 0 0 var(--space-3);
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-1);
+}
