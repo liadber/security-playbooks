@@ -1,0 +1,10 @@
+{
+  "name": "security-playbooks",
+  "private": true,
+  "scripts": {
+    "typecheck": "npm --prefix server run typecheck && npm --prefix client run typecheck",
+    "lint": "npm --prefix server run lint && npm --prefix client run lint",
+    "format:check": "npm --prefix server run format:check && npm --prefix client run format:check",
+    "test": "npm --prefix server test && npm --prefix client test"
+  }
+}

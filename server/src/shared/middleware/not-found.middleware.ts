@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express';
+import { SHARED_ERRORS } from '../constants/errors.constants.js';
 import { HttpStatus } from '../constants/http-status.constants.js';
 import { HttpError } from '../errors/http-error.js';
 
@@ -7,5 +8,5 @@ import { HttpError } from '../errors/http-error.js';
  * JSON shape stays the same as every other error.
  */
 export const notFoundHandler: RequestHandler = (_req, _res, next) => {
-  next(new HttpError(HttpStatus.NOT_FOUND, 'Route not found'));
+  next(new HttpError(HttpStatus.NOT_FOUND, SHARED_ERRORS.ROUTE_NOT_FOUND));
 };

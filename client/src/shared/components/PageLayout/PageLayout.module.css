@@ -1,0 +1,51 @@
+/* The shell fills the viewport, so the header always stays visible and the page itself never
+   scrolls: only the parts a page marks for it scroll. The chain is a flex column all the way
+   down, with min-height: 0 on the containers so they may shrink below their content. */
+.page {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: var(--color-surface);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.headerInner {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.brand {
+  font-weight: var(--font-weight-bold);
+}
+
+.nav {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.user {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-muted);
+}
+
+/* The page body takes the height left under the header and hands it down as a flex column. */
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3);
+}

@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express';
 import type { ZodType } from 'zod';
+import { SHARED_ERRORS } from '../constants/errors.constants.js';
 import { HttpStatus } from '../constants/http-status.constants.js';
 
 /**
@@ -16,7 +17,7 @@ export function validateBody(schema: ZodType): RequestHandler {
         const field = issue.path.join('.') || 'body';
         fields[field] ??= issue.message;
       }
-      res.status(HttpStatus.BAD_REQUEST).json({ error: 'Validation failed', fields });
+      res.status(HttpStatus.BAD_REQUEST).json({ error: SHARED_ERRORS.VALIDATION_FAILED, fields });
       return;
     }
 

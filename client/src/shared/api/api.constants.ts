@@ -4,6 +4,7 @@ export const JSON_CONTENT_TYPE = 'application/json';
 
 export const HttpStatus = {
   NO_CONTENT: 204,
+  NOT_FOUND: 404,
   UNAUTHORIZED: 401,
 } as const;
 

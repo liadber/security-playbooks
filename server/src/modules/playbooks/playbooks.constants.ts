@@ -31,3 +31,9 @@ export const PLAYBOOK_MAX_ACTIONS = 3;
  * and accents but ignores case, so "Phishing" and "phishing" are the same name.
  */
 export const NAME_COLLATION = { locale: 'en', strength: 2 } as const;
+
+/** Messages of the errors this module answers with; the client shows them as they are. */
+export const PLAYBOOK_ERRORS = {
+  NOT_FOUND: 'Playbook not found',
+  NAME_TAKEN: 'A playbook with this name already exists',
+} as const;
