@@ -62,6 +62,20 @@ Expected response:
 { "status": "ok", "db": "connected" }
 ```
 
+### 5. Start the client
+
+In a second terminal, from the project root:
+
+```sh
+cd client
+npm install
+npm run dev
+```
+
+The app runs on `http://localhost:5173`. Its dev server proxies every request to `/api/*` to the API server at `http://localhost:4000` with the `/api` prefix removed, so the browser talks to a single origin and the auth cookie is first-party. If your server runs on another port, copy `client/.env.example` to `client/.env` and set `SERVER_PORT`. It has no `VITE_` prefix on purpose: only `VITE_`-prefixed variables are exposed to browser code, and this one is read by `vite.config.ts` alone.
+
+Open `http://localhost:5173`, create an account, and you land on the Simulate page.
+
 ## API
 
 All request and response bodies are JSON. Errors have the shape `{ "error": "<message>" }`; validation errors add a `fields` object with one message per invalid field. Unknown routes answer 404 in the same shape.
@@ -118,6 +132,8 @@ catch { $_.ErrorDetails.Message }
 
 ## Tests
 
+### Server
+
 ```sh
 cd server
 npm test
@@ -126,6 +142,21 @@ npm test
 Unit tests (config, password hashing, tokens, validation schemas) need nothing else. Integration tests send real HTTP requests to the app with `supertest` against an in-memory MongoDB started by `mongodb-memory-server`, so Docker does not need to be running. The first run downloads a MongoDB binary (a few hundred MB; about 600 MB on Windows) into `~/.cache/mongodb-binaries`, so it takes a few minutes; later runs take seconds.
 
 `npm run test:watch` re-runs the tests on every save. Test files sit next to the code they test (`*.test.ts`) and are excluded from the build output.
+
+### Client
+
+```sh
+cd client
+npm test
+```
+
+Vitest with Testing Library in jsdom; nothing else needs to be running. The API module is mocked in page tests, so they exercise the real routes, forms and auth state without a server. Test files sit next to the code they test (`*.test.ts` / `*.test.tsx`). `npm run test:watch` re-runs them on every save.
+
+## Shared types (`shared/types`)
+
+The contract between client and server lives once, in `shared/types/`, as `.d.ts` files: the public user (`PublicUser`), the error body (`ErrorResponse`) and the auth request body (`Credentials`). Both sides import them with `import type` through the `@shared/*` alias (a `paths` entry in each `tsconfig`, mirrored by a Vite alias on the client). Type-only imports are erased when the code is compiled or run, so nothing at runtime depends on the folder and the server's build output is unchanged.
+
+Only types belong there. Values such as the minimum password length stay on the side that enforces them: the server is the source of truth for validation, and the client repeats the few limits its forms need as its own constants. The server's zod schemas are tied to the contract with `satisfies z.ZodType<Credentials>`, so a schema that drifts from the shared type fails typecheck. The folder holds only interfaces, so it is covered by typecheck and Prettier on both sides; there is nothing for ESLint to check.
 
 ## Project structure (`server/src`)
 
@@ -151,3 +182,53 @@ index.ts     connects to MongoDB and starts listening
 | `npm run format:check` | Check formatting without writing      |
 | `npm run build`        | Compile TypeScript to `dist/`         |
 | `npm start`            | Run the compiled server from `dist/`  |
+
+## Project structure (`client/src`)
+
+```
+features/    one folder per feature: pages, API calls, types, constants (including route paths)
+  auth/      login/register page and form, AuthProvider + useAuth, auth.api.ts
+  playbooks/ placeholder page
+  simulation/ placeholder page
+shared/      code any feature may use
+  api/       request() (the single fetch wrapper), ApiError, the unauthorized handler
+  forms/     useFormAction (form actions with server errors) and toFormErrors
+  components/ Button, FormField, ErrorMessage, LoadingScreen, PageLayout (CSS Modules)
+  styles/    CSS variables for colors and spacing, global reset
+app/         routes, route guards (routing/), AppLayout (header), not-found page
+App.tsx      BrowserRouter > AuthProvider > routes
+main.tsx     mounts the app
+```
+
+Dependencies point one way: `app/` may import from `features/` and `shared/`; a feature imports only from `shared/` (never from another feature or from `app/`); `shared/` imports from neither. Test files follow the same rule, which is why the helper that renders the whole app lives in `app/`.
+
+Imports that leave their own folder use the `@/` alias for `client/src` (for example `@/shared/api/http`), so there are no `../` paths to count; imports within a folder stay relative (`./`). The alias is a `paths` entry in `tsconfig.app.json` and a `resolve.alias` entry in `vite.config.ts`, which Vitest reads too. `@shared/` is the same mechanism for the type-only contract with the server.
+
+One kind of thing per file: components, hooks, functions, types and constants each have their own file (`*.types.ts`, `*.constants.ts`). The one exception is a component's own `Props` type, which stays in the component's file because it is part of the component's signature. `vite.config.ts` is exempt, since it cannot import from `src/`.
+
+### Main decisions
+
+- **The client never handles the token.** The server sets an httpOnly cookie; `request()` sends `credentials: 'same-origin'` and the browser attaches the cookie. Nothing is kept in `localStorage` or `sessionStorage`, so a script injected into the page has nothing to steal.
+- **Session check before routing.** `AuthProvider` calls `/auth/me` on start and the route guards show a loading state until it answers, so reloading a protected page does not bounce a logged-in user to `/login`.
+- **Navigation lives in the route guards.** `ProtectedRoute` sends a visitor to `/login` and remembers the page they asked for; `GuestRoute` sends a logged-in user back to that page, or to the home route. Only in-app paths are honoured, so the login page cannot be used as an open redirect. Pages never call `navigate()`: after login or logout the guards react to the auth state.
+- **An expired session logs out everywhere.** The token lives for an hour. When any request is answered with 401, `shared/api` notifies a handler that `AuthProvider` registers to clear the user, and the guards redirect to `/login`. A wrong-password login is also a 401, but the user was already logged out, so the form simply shows the error.
+- **One fetch wrapper.** Every call goes through `shared/api/request()`, which turns the server's `{ error, fields }` responses into an `ApiError`; pages only decide where to show `message` and `fields`.
+- **React 19 form Actions through one hook.** `shared/forms/useFormAction` wraps `useActionState`: the form passes a submit function and gets back the state (general error, per-field errors, kept values), the form action and `isPending`. Chosen field values (the email) survive a failed submit; passwords never do. Browser attributes (`required`, `type="email"`, `minLength`) give first-line validation; the server's rules remain the source of truth.
+- **Registering logs in.** The server's register endpoint only creates the account, so the client calls login right after it.
+- **Feature folders, one kind of thing per file, named constants.** Route paths and API endpoints live in each feature's constants file; `shared/` never imports from `features/`.
+- **Dev proxy instead of CORS.** During development Vite forwards `/api/*` to the server, so no CORS headers are needed and the `SameSite=Strict` cookie works unchanged.
+- **No magic numbers in CSS.** Every value a stylesheet uses (colors, spacing, border and focus-ring widths, radii, font sizes and weights, line height, opacity, widths) is a variable in `shared/styles/variables.css`; only `0` and `100%`/`100vh` appear as literals. Units: `px` for borders, outlines and radii; `rem` for spacing, sizes, widths and font sizes.
+
+## Scripts (in `client/`)
+
+| Script                 | What it does                             |
+| ---------------------- | ---------------------------------------- |
+| `npm run dev`          | Vite dev server with the `/api` proxy    |
+| `npm run typecheck`    | Type-check the app and config            |
+| `npm run lint`         | Run ESLint                               |
+| `npm run format`       | Format with Prettier                     |
+| `npm run format:check` | Check formatting without writing         |
+| `npm test`             | Run the tests once                       |
+| `npm run test:watch`   | Re-run tests on every save               |
+| `npm run build`        | Type-check and build to `dist/`          |
+| `npm run preview`      | Serve the production build locally       |
