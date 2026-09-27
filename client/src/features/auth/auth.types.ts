@@ -1,5 +1,6 @@
 import type { Credentials } from '@shared/types/auth';
 import type { PublicUser } from '@shared/types/user';
+import type { AUTH_MODE } from './auth.constants';
 
 export interface AuthContextValue {
   /** The logged-in user, or null when logged out. */
@@ -11,3 +12,5 @@ export interface AuthContextValue {
   register(credentials: Credentials): Promise<void>;
   logout(): Promise<void>;
 }
+
+export type AuthMode = (typeof AUTH_MODE)[keyof typeof AUTH_MODE];
