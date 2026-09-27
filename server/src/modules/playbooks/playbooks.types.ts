@@ -8,3 +8,12 @@ export interface IPlaybook {
   trigger: TriggerCode;
   actions: ActionCode[];
 }
+
+/**
+ * Route parameters of /playbooks/:id. The index signature keeps the type compatible with
+ * Express's ParamsDictionary, so handlers typed with it accept the shared middleware.
+ */
+export interface PlaybookParams {
+  id: string;
+  [key: string]: string;
+}

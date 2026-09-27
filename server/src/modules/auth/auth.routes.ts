@@ -7,10 +7,9 @@ import { AUTH_COOKIE_NAME } from './auth.constants.js';
 import { authCookieOptions } from './auth.cookie.js';
 import { loginSchema, registerSchema } from './auth.schemas.js';
 import { createAuthService } from './auth.service.js';
-import { createTokenService } from './token.service.js';
+import type { TokenService } from './auth.types.js';
 
-export function createAuthRouter(config: Config): Router {
-  const tokens = createTokenService(config.jwtSecret);
+export function createAuthRouter(config: Config, tokens: TokenService): Router {
   const authService = createAuthService(tokens);
   const cookieOptions = authCookieOptions(config.cookieSecure);
   const router = Router();
