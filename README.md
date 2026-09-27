@@ -40,12 +40,16 @@ Open `http://localhost:5173`, create an account, and you land on the Simulate pa
 
 ## Tests
 
+From the project root, after installing both sides:
+
 ```sh
-npm --prefix server test
-npm --prefix client test
+npm test              # server tests, then client tests
+npm run typecheck
+npm run lint
+npm run format:check
 ```
 
-Each side also has `typecheck`, `lint` and `format:check` scripts. The first server test run downloads a MongoDB binary for `mongodb-memory-server` (about 600 MB on Windows), so it takes a few minutes; later runs take seconds.
+Each root script runs the same-named script in `server/` and then in `client/`. The first server test run downloads a MongoDB binary for `mongodb-memory-server` (about 600 MB on Windows), so it takes a few minutes; later runs take seconds.
 
 ## Structure
 
