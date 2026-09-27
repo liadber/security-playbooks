@@ -17,9 +17,12 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     resolve: {
-      // Mirrors the @shared/* path in tsconfig; the folder holds type-only files, so the
-      // alias only matters for tooling that resolves imports before TypeScript erases them.
-      alias: { '@shared': fileURLToPath(new URL('../shared', import.meta.url)) },
+      // Mirror the paths in tsconfig.app.json; Vitest reads this config too, so tests
+      // resolve them as well. @shared is type-only, so it only matters for tooling.
+      alias: {
+        '@shared': fileURLToPath(new URL('../shared', import.meta.url)),
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
     },
     server: {
       // Forwards /api/* to the API server with the prefix removed, so the browser only

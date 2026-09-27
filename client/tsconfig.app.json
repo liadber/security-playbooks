@@ -22,8 +22,9 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
 
-    /* Contract types shared with the server (type-only, erased at build time) */
+    /* @/ for imports that leave their folder; @shared/ for the type-only contract with the server */
     "paths": {
+      "@/*": ["./src/*"],
       "@shared/*": ["../shared/*"]
     }
   },
