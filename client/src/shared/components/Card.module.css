@@ -1,0 +1,11 @@
+.card {
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.highlighted {
+  border-color: var(--color-primary);
+  outline: var(--border-width) solid var(--color-primary);
+}
