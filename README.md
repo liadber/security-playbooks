@@ -87,6 +87,36 @@ All request and response bodies are JSON. Errors have the shape `{ "error": "<me
 | POST   | `/auth/login`    | no     | Body: `{ email, password }`. Sets the auth cookie and returns 200 with `{ id, email }`, or 401.                          |
 | POST   | `/auth/logout`   | no     | Clears the auth cookie. Returns 204, also when not logged in.                                                           |
 | GET    | `/auth/me`       | cookie | Returns the current user's `{ id, email }`, or 401 without a valid cookie.                                              |
+| GET    | `/playbooks/options` | cookie | The triggers and actions a playbook can use, with labels, and the name length limit.                                |
+| GET    | `/playbooks`     | cookie | The user's playbooks, sorted by name.                                                                                   |
+| POST   | `/playbooks`     | cookie | Create a playbook. Returns 201 with it, 400 on invalid input, 409 if the user already has that name.                   |
+| PATCH  | `/playbooks/:id` | cookie | Update any subset of a playbook's fields. Returns 200 with it, 400, 404 or 409.                                        |
+| DELETE | `/playbooks/:id` | cookie | Delete a playbook. Returns 204, or 404.                                                                                |
+| POST   | `/simulateTrigger` | cookie | Which of the user's playbooks would run for a trigger. Returns 200 with the matches (possibly none), or 400.         |
+
+Every playbook and simulation route answers 401 without a valid cookie.
+
+### Playbooks and simulation
+
+A playbook is `{ id, name, trigger, actions }`: a trigger code (`MALWARE_DETECTED`, `LOGIN_ATTEMPT`, `PHISHING_ALERT`) and one to three distinct action codes (`ISOLATE_HOST`, `NOTIFY_ADMIN`, `BLOCK_IP`). The shapes live once, in `shared/types/playbook.d.ts` and `simulation.d.ts`.
+
+| Request                                  | Body                                    | Response                                                   |
+| ---------------------------------------- | --------------------------------------- | ---------------------------------------------------------- |
+| `GET /playbooks/options`                 |                                         | `{ triggers: [{ code, label }], actions: [{ code, label }], nameMaxLength }` |
+| `GET /playbooks`                         |                                         | `[{ id, name, trigger, actions }]`                          |
+| `POST /playbooks`                        | `{ name, trigger, actions }`            | 201 `{ id, name, trigger, actions }`                        |
+| `PATCH /playbooks/:id`                   | any subset of `{ name, trigger, actions }`, not empty | 200 `{ id, name, trigger, actions }`          |
+| `DELETE /playbooks/:id`                  |                                         | 204                                                        |
+| `POST /simulateTrigger`                  | `{ trigger }`                           | `{ trigger, matches: [{ id, name, actions }] }`             |
+
+Validation (400 with a message per field): the name is trimmed, required and at most 100 characters; the trigger must be a known code; the actions are 1 to 3 known codes with no repeats (a repeat is an error, not silently removed, because the server does not trust the client's checkboxes). A PATCH body with no fields is a 400. The server stores and returns actions in one canonical order (Isolate Host, Notify Admin, Block IP), whatever order was sent. Nothing about a simulation is stored.
+
+Decisions:
+
+- **Codes in the database, labels in code, and an options endpoint.** Playbooks store codes such as `MALWARE_DETECTED`; the display labels exist only in `playbooks.constants.ts`, typed as `Record<TriggerCode, string>` so a missing or extra code fails typecheck. `GET /playbooks/options` returns the codes with their labels and the name limit, so the client reads these rules from the server instead of repeating them.
+- **One name per user, enforced by the database.** A unique index on `{ userId, name }` with the collation `{ locale: 'en', strength: 2 }` makes "Phishing" and "phishing" the same name for one user while two users may use the same name. The index, not a find-then-save check, enforces it: two concurrent creates cannot both succeed. A violation becomes a 409. The same collation sorts lists, otherwise every capitalised name would sort before every lowercase one.
+- **404, never 403, for a playbook that is not yours.** Every lookup is `{ _id, userId }`, so a foreign playbook, a missing one and an id that is not an ObjectId all get the same `404 Playbook not found`; a 403 would confirm that the id exists. The id is checked before querying so Mongoose never throws on a malformed one.
+- **PATCH rather than PUT.** A partial update is available to any API caller, not only the app's form: the body is the create schema made partial, so a caller may send one field or all of them, with the same rules and the same 409 on a name collision. The form sends the whole playbook, which is simply a valid PATCH.
 
 ### Authentication
 

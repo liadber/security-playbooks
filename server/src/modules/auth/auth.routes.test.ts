@@ -2,6 +2,7 @@ import request, { type Response } from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../app.js';
 import { HttpStatus } from '../../shared/constants/http-status.constants.js';
+import { loggedInAgent } from '../../shared/testing/test-agent.js';
 import { TEST_CONFIG } from '../../shared/testing/test-config.js';
 import { useTestDatabase } from '../../shared/testing/test-db.js';
 import { AUTH_COOKIE_NAME, TOKEN_LIFETIME_SECONDS } from './auth.constants.js';
@@ -26,14 +27,6 @@ function authCookie(res: Response): string {
 }
 
 const cookieValue = (cookie: string) => cookie.split(';')[0].slice(AUTH_COOKIE_NAME.length + 1);
-
-/** A logged-in agent: supertest agents keep cookies between requests like a browser. */
-async function loggedInAgent() {
-  const agent = request.agent(app);
-  const registered = await agent.post('/auth/register').send(credentials);
-  await agent.post('/auth/login').send(credentials);
-  return { agent, userId: registered.body.id as string };
-}
 
 describe('POST /auth/register', () => {
   it('returns 201 with the id and email', async () => {
@@ -129,7 +122,7 @@ describe('GET /auth/me', () => {
     request(app).get('/auth/me').set('Cookie', `${AUTH_COOKIE_NAME}=${token}`);
 
   it('returns 200 with the current user when the login cookie is sent', async () => {
-    const { agent, userId } = await loggedInAgent();
+    const { agent, userId } = await loggedInAgent(app, credentials);
 
     const res = await agent.get('/auth/me');
 
@@ -169,7 +162,7 @@ describe('GET /auth/me', () => {
 
 describe('POST /auth/logout', () => {
   it('clears the cookie with the same attributes and returns 204', async () => {
-    const { agent } = await loggedInAgent();
+    const { agent } = await loggedInAgent(app, credentials);
 
     const res = await agent.post('/auth/logout');
 
@@ -183,7 +176,7 @@ describe('POST /auth/logout', () => {
   });
 
   it('makes /auth/me answer 401 afterwards', async () => {
-    const { agent } = await loggedInAgent();
+    const { agent } = await loggedInAgent(app, credentials);
     await agent.post('/auth/logout');
 
     const res = await agent.get('/auth/me');
